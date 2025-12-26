@@ -3,69 +3,71 @@
 ÉTS - LOG430 - Architecture logicielle - Chargé de laboratoire: Gabriel C. Ullmann, Automne 2025.    
 
 ## 🎯 Objectifs d’apprentissage
-- Comprendre comment utiliser des conteneurs avec **Docker**.
+- Apprendre à créer un projet **Python** conteneurisé avec **Docker** à partir de zéro.
 - Apprendre à écrire et exécuter des tests automatisés avec **pytest**.
-- Mettre en place un pipeline **CI/CD** avec **GitHub** et **Docker**.
-- Accéder à un serveur via **SSH** et vérifier la disponibilité des ressources computationnelles (CPU, RAM, espace disque)
-- Savoir combiner les outils de développement modernes (VS Code, **Git**, **Docker**) pour lancer un cycle de développement logiciel.
+- Mettre en place un pipeline **CI/CD** avec les ressources à notre disposition.
 
 ---
 
 ## ⚙️ Setup
-Dans ce laboratoire, vous travaillerez sur une application calculatrice. Cette calculatrice est volontairement très simple afin que nous puissions nous concentrer sur la configuration du projet, ainsi que sur la création et la maintenance d'un pipeline CI/CD. 
+
+Dans ce laboratoire, vous travaillerez sur une application calculatrice. Cette calculatrice est volontairement très simple afin que nous puissions nous concentrer sur la configuration et la structure du projet, ainsi que sur la création d'un pipeline CI/CD. 
+
+Vous allez créer la structure du projet vous-même à partir de zéro, en créant le `requirements.txt`, `Dockerfile`, `docker-compose.yml`, `.env` et `config.py`. Chaque activité vous guidera dans une étape de setup, puis l'implémentation. Il est très important de réaliser ce laboratoire car:
+- Les concepts que vous apprendrez ici vous aideront dans **TOUS** les laboratoires suivants.
+- Les concepts architecturaux et les pratiques de développement que vous apprenez ici peuvent être appliqués au projet, dans n'importe quel langage de programmation ou framework.
 
 Dans les prochains laboratoires, nous verrons des architectures plus complexes et nous travaillerons avec une variété d'outils logiciels et de concepts architecturaux.
 
-> ⚠️ IMPORTANT : Avant de commencer le setup et les activités, veuillez lire la documentation architecturale dans le répertoire `/docs/arc42/docs.pdf`.
+> ⚠️ ATTENTION : Si vous n'avez dèjá, nous vous recommendons d'installer **VS Code**, **Python 3+** et **Docker Desktop** avant de commencer.
 
-### 1. Faites un fork et clonez le dépôt GitHub
+> ⚠️ IMPORTANT : Avant de commencer le setup et les activités, veuillez lire la documentation architecturale dans le répertoire `/docs/arc42/docs.pdf` pour comprendre que type d'application nous seront en train de développer.
+
+### 1. Clonez le dépôt GitHub
 
 ```bash
-git clone https://github.com/guteacher/log430-a25-labo0
+git clone https://github.com/[votrenom]/log430-labo0
 cd log430-a25-labo0
 ```
 
-### 2. Créez le conteneur Docker
-Construisez le conteneur Docker `labo0-calculator` et lancez-le de manière itérative.
-```bash
-docker build -t labo0-calculator .
-docker run -it labo0-calculator 
+### 2. Créez votre fichier requirements.txt
+Le fichier `requirements.txt` contien la liste de dépendances Python que vous avez besoin pour rouler votre projet et qui seront installés via [pip](https://www.w3schools.com/python/python_pip.asp) dans votre environnement. Vous aurez besoin d'un seule dépendance pour ce projet, `pytest` (pour éxecuter les tests unitaires). Alors, créez un fichier `requirements.txt` dans le repertorie racine de votre projet :
+
+```sh
+pytest>=7.0
 ```
 
-Dans un autre instance du terminal, vous pouvez vérifier si le conteneur a été correctement démarré. 
-```bash
-docker ps
+### 3. Créez votre Dockerfile
+Un fichier `Dockerfile` est une recette permettant de créer une image de conteneur Docker. Un conteneur est une machine virtuelle simplifiée qui s'exécutera dans votre environnement de développement local, mais qui peut également s'exécuter dans un environnement de production si vous le souhaitez. Créez un fichier `Dockerfile` dans le repertorie racine de votre projet :
+
+```sh
+FROM python:3.11-slim
+WORKDIR /app
+COPY src/ ./src/
 ```
 
-> 📝 **NOTE** : Si vous exécutez des conteneurs sur votre ordinateur de développement, vous pouvez utiliser [Docker Desktop](https://www.docker.com/products/docker-desktop/) pour faciliter la gestion des conteneurs. Lorsque vous déployez sur un serveur, vous devrez utiliser l'interface de ligne de commande. Il existe des outils avancés de gestion Docker pour les serveurs, tels que [Portainer](https://www.portainer.io/), mais nous ne les aborderons pas ici. 
+### 4. Créez votre docker-compose.yml
+Un fichier `docker-compose.yml` décrit quelles conteneurs (également appelées services) seront crées en utilisant votre image de conteneur Docker comme base. Dans notre cas, nous voulons uniquement exécuter notre calculatrice. Créez un fichier `docker-compose.yml` dans le repertorie racine de votre projet :
 
-### 3. Créez un environnement virtuel Python sur votre ordinateur
-
-#### Sur Linux/Mac
-```bash
-python -m venv .venv/labo0
-source .venv/labo0/bin/activate
+```yml
+services:
+  calculator:
+    build: .
+    volumes:
+      - .:/app
 ```
 
-#### Sur Windows
-```bash
-python -m venv .venv/labo0
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser # Si nécessaire
-.venv\labo0\Scripts\activate.ps1
+### 4. Créez votre .env
+Un fichier `.env` est utilisé pour garder variables d'une application qui sont distinctes pour chaque instance et que nous ne voulons pas écrire dans les code par raisons de securité et flexibilité. Par example, une application de gestion de magasin aura une base de données different pour chaque magasin, avec un nom d'utilisateur et mot de passe également distinctes et qui ne doivent pas êtres partagés dans le code. Ici, dans ce très simple cas, nous garderons simplement le nom de l'utilisateur de la calculatrice. Créez un fichier `.env` dans le repertorie racine de votre projet :
+```sh
+CALCULATOR_USERNAME="Your Name"
 ```
 
-### 4. Installez les dépendances Python
+Une fois le fichier `.env` est crée et la variable existe, l'application sur `/src/calculator.py` est dèjá preparé pour lire le `.env`, extraire la variable `CALCULATOR_USERNAME` et l'utiliser. Si vous faites votre propre application du zéro, vous devriez écrire vous même le code pour lire le `.env`, ou utiliser une librarie tel que [dotenv](https://www.geeksforgeeks.org/python/using-python-environment-variables-with-python-dotenv/) pour vous aider.
 
-```bash
-pip install -r requirements.txt
-```
+### 5. Demarrez le contenuer
+Dans le terminal, éxécutez :
 
-### 5. Lancez l’application
-
-```bash
-cd src
-python calculator.py
-```
 
 ---
 

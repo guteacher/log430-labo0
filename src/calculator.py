@@ -9,7 +9,11 @@ class Calculator:
 
     def get_hello_message(self):
         """ Show welcome message """
-        return "== Calculatrice v1.0 =="
+        message = "== Calculatrice v1.0 =="
+        with open(".env", "+r") as file:
+            content = file.read()
+            message += content.split("=")[1]
+        return message
 
     def addition(self, v1, v2):
         """ Add 2 values """
