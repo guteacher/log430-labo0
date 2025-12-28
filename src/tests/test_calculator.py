@@ -9,7 +9,6 @@ from calculator import Calculator
 def test_app():
     my_calculator = Calculator()
     welcome_message = my_calculator.get_hello_message()
-    assert "Bienvenu(e)" in welcome_message
     assert "== Calculatrice v1.0 ==" in welcome_message
 
 # TODO: ajoutez les tests

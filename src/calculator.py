@@ -14,13 +14,17 @@ class Calculator:
         This code would have to be expanded if we were to support multiple variables. 
         """
         message = "== Calculatrice v1.0 ==\n"
-        with open(".env", "r") as file:
-            content = file.read()
-            content_parts = content.split("=")
-            if len(content_parts) == 2:
-                username = content_parts[1]
-                message += f"Bienvenu(e) {username}\n"
-        return message
+        try:
+            with open(".env", "r") as file:
+                content = file.read()
+                content_parts = content.split("=")
+                if len(content_parts) == 2:
+                    username = content_parts[1]
+                    message += f"Bienvenu(e) {username}\n"
+        except FileNotFoundError:
+            print("Votre fichier .env n'était pas trouvé! Le nom d'utilisateur ne sera pas montré dans l'application.")
+        finally:
+            return message
 
     def addition(self, v1, v2):
         """ Add 2 values """
