@@ -15,7 +15,7 @@
 
 Dans ce laboratoire, vous travaillerez sur une application calculatrice. Cette calculatrice est volontairement très simple afin que nous puissions nous concentrer sur la configuration et la structure du projet, ainsi que sur la création d'un pipeline CI/CD.
 
-Vous allez créer la structure du projet vous-même à partir de zéro, en créant le `requirements.txt`, `Dockerfile`, `docker-compose.yml` et `.env`. Chaque activité vous guidera dans une étape de setup, puis l'implémentation. Il est très important de réaliser ce laboratoire car:
+Vous allez créer la structure du projet vous-même à partir de zéro, en créant le `requirements.txt`, `Dockerfile`, `docker-compose.yml` et `.env`. Chaque activité vous guidera dans une étape de setup, puis l'implémentation. Il est très important de réaliser ce laboratoire car :
 
 - Les concepts que vous apprendrez ici (ex. le setup Python et Docker, les approches de test et déploiement, etc.) vous aideront à mieux comprendre **TOUS** les laboratoires suivants.
 - Les concepts architecturaux et les pratiques de développement que vous apprenez ici peuvent être appliqués au projet, **dans n'importe quel langage de programmation ou framework**.
@@ -70,7 +70,7 @@ services:
 
 ### 5. Créez votre .env
 
-Un fichier `.env` est utilisé pour garder les variables d'une application qui sont distinctes pour chaque instance et que nous ne voulons pas écrire dans le code pour des raisons de sécurité et de flexibilité. Par exemple, une application de gestion de magasin aura une base de données différente pour chaque magasin, avec un nom d'utilisateur et mot de passe également distincts et qui ne doivent pas être partagés dans le code. Ici, dans ce très simple cas, nous garderons simplement le nom de l'utilisateur de la calculatrice. Créez un fichier `.env` dans le répertoire racine de votre projet avec une seule ligne :
+Un fichier `.env` est utilisé pour garder les variables d'une application qui sont distinctes pour chaque instance et que nous ne voulons pas écrire dans le code pour des raisons de sécurité et de flexibilité. Par exemple, une application de gestion de magasin aura une base de données différente pour chaque magasin, avec un nom d'utilisateur et un mot de passe également distincts et qui ne doivent pas être partagés dans le code. Ici, dans ce très simple cas, nous garderons simplement le nom de l'utilisateur de la calculatrice. Créez un fichier `.env` dans le répertoire racine de votre projet avec une seule ligne :
 
 ```sh
 CALCULATOR_USERNAME=YourName
@@ -87,7 +87,7 @@ docker compose build
 docker compose up -d
 ```
 
-Ensuite, cliquez sur votre conteneur dans la liste dans Docker Desktop, sélectionnez l'onglet `Exec` et exécutez:
+Ensuite, cliquez sur votre conteneur dans la liste dans Docker Desktop, sélectionnez l'onglet `Exec` et exécutez :
 
 ```sh
 python src/calculator.py
@@ -108,7 +108,7 @@ def test_addition():
     assert addition(2, 3) == 5
 ```
 
-Pour lancer les tests:
+Pour lancer les tests :
 
 ```bash
 pytest
@@ -143,44 +143,154 @@ Déployer en production signifie copier votre dépôt et faire le setup de votre
 - Un serveur physique dans une entreprise/école
 - Un serveur en nuage (ex. Azure, AWS, etc.)
 - Une machine virtuelle (VM) dans un serveur
-- Une machine virtuelle (VM) dans un gestionnaire de machines virtuelles qui pourrait lui-même être dans une machine virtuelle (ex. Proxmox)
 
-Dans le cours LOG430, nous utiliserons [Proxmox](https://proxmox.com/en/), une plateforme de virtualisation.
+Dans le cours LOG430, nous utiliserons des VMs créées dans [LXD](https://canonical.com/lxd), une application de gestion de VMs et conteneurs. Nous utiliserons une instance LXD hébergée par l'école.
 
-#### 4.1 Qu'est-ce que Proxmox?
+### 5. Installez le client LXD
 
-Proxmox est un logiciel qui nous permet de créer et gérer plusieurs machines virtuelles ou conteneurs. Proxmox peut être installé directement sur un ordinateur ou dans une machine virtuelle.
+Le client LXD est disponible pour Windows, macOS et Linux.
 
-#### 4.2 N'est-ce pas un peu trop compliqué? Pourquoi ne pas simplement déployer sur un serveur fourni par l'école ou sur notre propre ordinateur?
+Installez sur Windows via `chocolatey` :
+```sh
+choco install lxc
+```
 
-Parce qu'en utilisant Proxmox, nous pouvons simuler l'expérience de travailler avec une plateforme en nuage (ex. Azure, AWS, etc.) sans avoir besoin d'un compte sur ces plateformes ou les limitations d'utilisation de ce compte. Nous pouvons simplement créer une instance Proxmox sur notre ordinateur ou sur un serveur externe (ex. avec une infrastructure fournie par l'école) et avoir quelque chose de similaire à un nuage privé où nous pouvons créer des machines virtuelles en utilisant une interface graphique ou une ligne de commande.
+Installez sur Windows (WSL) ou Linux via `snap` :
+```sh
+snap install lxd
+```
 
-#### 4.3 Pourquoi mettons-nous l'accent sur l'utilisation du nuage dans ce cours?
+Installez sur macOS via `brew` :
+```sh
+brew install lxc
+```
 
-Parce que la majorité des grandes applications dans l'industrie sont déployées en nuage, nous devons nous familiariser avec ce type d'environnement si nous voulons être bien préparés à les utiliser de manière professionnelle ou pour des projets personnels.
+Pour ajouter les deux serveurs LXD, connectez-vous au VPN et exécutez :
+```sh
+lxc remote add fiware-1.logti.etsmtl.ca
+lxc remote add fiware-2.logti.etsmtl.ca
+```
 
-Dans ce labo, nous ferons le setup d'une instance Proxmox dans notre environnement de développement (c'est-à-dire, sur notre propre ordinateur). Dans les prochains labos, nous utiliserons une instance fournie par l'ÉTS.
+Ces commandes demanderont un jeton chacune. Demandez votre jeton au chargé de lab.
 
-### 5. Installez Proxmox
+> 📝 **NOTE** : Ce sont des jetons à usage unique. Par conséquent, lorsqu'une personne intègre un serveur dans son client LXD, le jeton est annulé et ne peut plus être utilisé pour ajouter un second client.
 
-Tout d'abord, téléchargez l'image ISO de Proxmox. Cette image est conçue pour être installée directement sur un ordinateur, mais, dans notre cas, nous l'installerons dans une VM en utilisant une application telle que [Oracle VirtualBox](https://www.virtualbox.org/) ou [UTM](https://mac.getutm.app/).
+### 6. Créez des VMs dans votre serveur LXD
+Pour créer une VM dans le serveur `fiware-1.logti.etsmtl.ca`, par exemple :
+```sh
+lxc launch images:ubuntu/22.04 vm-test1 --remote fiware-1.logti.etsmtl.ca
+```
 
-- **Windows, Mac (Intel) ou Linux**: [Tutoriel avec VirtualBox](https://www.youtube.com/watch?v=j7hgAMuH7c8)
-- **Mac (ARM)**: [Tutoriel avec UTM](https://www.youtube.com/watch?v=5HrWEB6Mz00)
+Remplacez `vm-test1` par le nom que vous voulez donner à votre VM.
 
-### 6. Déployez votre application manuellement
+#### 6.1. Vérifier la création de la VM
 
-Créez une nouvelle VM sur Proxmox, puis déployez l'application sur un serveur ou une machine virtuelle via SSH manuellement:
+Pour voir la liste de VMs sur le serveur :
 
 ```bash
-ssh $my_username@$my_hostname
-git clone https://github.com/guteacher/log430-labo0
+lxc list --remote fiware-1.logti.etsmtl.ca
+```
+
+#### 6.2. Obtenir l'adresse IP de la VM
+
+```bash
+lxc list --remote fiware-1.logti.etsmtl.ca
+```
+
+Notez l'adresse IP de votre VM (colonne IPV4).
+
+Exemple de sortie :
+```sh
+| vm-test1 | RUNNING | 10.99.0.50 (eth0) | ... |
+```
+
+#### 6.3. Configurer SSH dans la VM
+
+Accédez à la VM pour installer et configurer SSH :
+
+```bash
+lxc exec vm-test1 --remote fiware-1.logti.etsmtl.ca -- bash
+```
+
+Puis à l'intérieur de la VM, exécutez :
+
+```bash
+apt update
+apt install openssh-server -y
+```
+
+#### 6.4. Créer une clé SSH (sur votre machine locale)
+
+Si vous n'avez pas encore de clé SSH :
+
+```bash
+ssh-keygen -t rsa -b 4096 -f ~/.ssh/lxd_key
+```
+
+Appuyez sur `Enter` pour accepter les paramètres par défaut.
+
+#### 6.5. Copier la clé publique dans la VM
+
+Depuis votre machine locale :
+
+```bash
+lxc file push ~/.ssh/lxd_key.pub vm-test1/root/.ssh/authorized_keys --remote fiware-1.logti.etsmtl.ca
+```
+
+#### 6.6. Configurer les permissions SSH
+
+À l'intérieur de la VM (via la commande `exec` de l'étape 6.3) :
+
+```bash
+chmod 600 ~/.ssh/authorized_keys
+systemctl enable ssh
+systemctl start ssh
+```
+
+#### 6.7. Annexe : commandes utiles pour les serveurs distants
+
+```bash
+# Arrêter une VM
+lxc stop vm-test1 --remote fiware-1.logti.etsmtl.ca
+
+# Supprimer une VM
+lxc delete vm-test1 --remote fiware-1.logti.etsmtl.ca --force
+
+# Démarrer une VM
+lxc start vm-test1 --remote fiware-1.logti.etsmtl.ca
+
+# Voir les logs d'une VM
+lxc logs vm-test1 --remote fiware-1.logti.etsmtl.ca
+
+# Copier des fichiers vers la VM
+lxc file push fichier_local.txt vm-test1/root/ --remote fiware-1.logti.etsmtl.ca
+
+# Copier des fichiers depuis la VM
+lxc file pull vm-test1/root/fichier.txt ./fichier.txt --remote fiware-1.logti.etsmtl.ca
+```
+
+### 7. Déployez votre application manuellement
+
+Depuis votre machine locale (vous devez être connecté au VPN), exécutez :
+
+```sh
+ssh -i ~/.ssh/lxd_key root@<IP_DE_LA_VM>
+```
+
+Remplacez `<IP_DE_LA_VM>` par l'adresse IP obtenue à l'étape 6.2. Exemple :
+
+```sh
+ssh -i ~/.ssh/lxd_key root@10.99.0.50
+```
+
+Une fois que vous êtes connecté, déployez l'application sur la VM manuellement. N'oubliez pas d'installer Python, Docker et toutes les dépendances nécessaires sur la VM :
+
+```sh
+git clone https://github.com/[votre-nom]/log430-labo0
 cd log430-labo0
 ```
 
-> 📝 **NOTE 1** : N'oubliez pas d'installer Python, Docker et toutes les dépendances nécessaires sur le serveur de déploiement.
-
-Quelques commandes utiles pour vérifier l'état des ressources :
+De plus, voici quelques commandes utiles pour vérifier l'état des ressources :
 
 ```sh
 free -h   # Vérifier l'utilisation de la RAM
@@ -188,19 +298,19 @@ top       # Vérifier l'utilisation du CPU et les processus en cours
 df -h     # Vérifier l'espace disque disponible
 ```
 
-> 📝 **NOTE 2** : si vous avez peu de RAM ou d'espace disque sur votre ordinateur, l'éxécution de Proxmox peut devenir très lente. Si vous avez des problèmes de performance, faites-moi signe.
+> 📝 **NOTE** : Si vous avez des problèmes de performance avec votre VM (par exemple, une VM lente ou bloquée), essayez de l'arrêter et de la redémarrer, ou de la recréer. Si cela ne fonctionne pas, faites-moi signe.
 
 > 💡 **Question 3** : Quel type d'informations pouvez-vous obtenir via la commande « top » ? Veuillez inclure la sortie du terminal dans votre réponse.
 
-### 7. Automatisez le déploiement continu (CD)
+### 8. Automatisez le déploiement continu (CD)
 
-Plusieurs alternatives existent pour le CD : déploiement déclenché par webhooks, accès SSH ou via un outil CI/CD (ex. ArgoCD). Cependant, dans ce labo, nous vous recommandons d'utiliser un [GitHub Runner auto-hébergé (self-hosted)](https://docs.github.com/fr/actions/how-tos/manage-runners/self-hosted-runners/add-runners).
+Plusieurs alternatives existent pour le CD : déploiement déclenché par webhooks via SSH, ou via un outil CI/CD (ex. ArgoCD). Cependant, dans ce labo, nous vous recommandons d'utiliser un [GitHub Runner auto-hébergé (self-hosted)](https://docs.github.com/fr/actions/how-tos/manage-runners/self-hosted-runners/add-runners).
 
-Nous vous recommandons cette approche parce que c'est la plus simple et moins dépendante d'une configuration spécifique de réseau (ex. il n'est pas nécessaire d'ouvrir des ports spécifiques dans le pare-feu, ou d'utiliser une approche événementielle).
+Nous vous recommandons le GitHub Runner parce que c'est l'approche plus simple et moins dépendante d'une configuration spécifique de réseau (ex. il n'est pas nécessaire d'ouvrir des ports dans le pare-feu, ou d'utiliser une approche événementielle).
 
 ---
 
 ## 📦 Livrables
 
 - Code compressé en `.zip` contenant **l'ensemble du code source** du projet Labo 00.
-- Rapport `.pdf` répondant aux 3 questions présentées dans ce fichier. Il est **obligatoire** d'ajouter du code ou des sorties de terminal pour illustrer chacune de vos réponses
+- Rapport `.pdf` répondant aux 3 questions présentées dans ce fichier. Il est **obligatoire** d'ajouter du code ou des sorties de terminal pour illustrer chacune de vos réponses.
