@@ -26,7 +26,7 @@ lxc file push fichier.txt <nom-vm>/root/
 lxc file pull <nom-vm>/root/fichier.txt ./fichier.txt
 ```
 
-# Annexe 2 : commandes `bash` utiles
+# Annexe 2 : autres commandes utiles
 ```bash
 # Vérifier l'utilisation du CPU et les processus en cours
 top     
