@@ -174,7 +174,7 @@ Ces commandes demanderont un jeton chacune. Demandez votre jeton au chargé de l
 
 > 📝 **NOTE** : Ce sont des jetons à usage unique. Par conséquent, lorsqu'une personne intègre un serveur dans son client LXD, le jeton est annulé et ne peut plus être utilisé pour ajouter un second client.
 
-Ensuite, configurez votre profil dans `lxc`. Il ne faudra le faire qu'une seule fois, les VMs subsequents suvront deja ces configurations :
+Ensuite, configurez votre profil dans `lxc`. Il ne faudra le faire qu'une seule fois, les VMs subséquentes suivront déjà ces configurations :
 
 ```bash
 # Ajouter un device root au profil
@@ -190,7 +190,7 @@ Pour créer une VM sur le serveur `fiware-1.logti.etsmtl.ca`, exécutez `lxc lau
 lxc launch ubuntu:22.04 fiware-1:<nom-vm> --vm
 ```
 
-> 📝 **NOTE** : Pour les noms de VMs, preferez les noms en kebab-case. Par exemple: `vm-gabriel-log430`.
+> 📝 **NOTE** : Pour les noms de VMs, préférez les noms en kebab-case. Par exemple: `vm-gabriel-log430`.
 
 > ⚠️ **IMPORTANT** : C'est crucial d'utiliser le flag `--vm` parce que, sans ce flag, LXD créera un conteneur au lieu d'une VM, et Docker ne pourra pas fonctionner.
 
@@ -209,11 +209,11 @@ Voici un exemple de sortie attendue :
 +--------------------+---------+------+-----------------------------------------------+-----------------+-----------+
 ```
 
-Si la colonne ipv4 est vide, ne vous inquitez pas, parce que nous allons configurez le réseau dans le prochains étapes.
+Si la colonne `IPV4` est vide pour vous, ne vous inquiétez pas, parce que nous allons configurer le réseau dans les prochaines étapes.
 
 #### 5.2. Changez les configurations de réseau de la VM
 
-Par défaut, la VM est dans un autre réseau, isolé du réseau ou `fiware-1.logti.etsmtl.ca` et ou votre ordinateur sont. Pour permettre l'accès SSH depuis votre ordinateur, vous devez configurer la VM sur l'interface bridge **br0**.
+Par défaut, la VM est dans un autre réseau, isolé du réseau où `fiware-1.logti.etsmtl.ca` et votre ordinateur sont. Pour permettre l'accès SSH depuis votre ordinateur, vous devez configurer la VM sur l'interface bridge **br0**.
 
 ```bash
 #  Ajouter l'interface br0 au profil default 
@@ -225,8 +225,8 @@ lxc restart fiware-1:<nom-vm>
 
 Attendre 30-40 secondes que la VM redémarre.
 
-#### 5.3. Configurez un addresse IP statique
-Pour défniir un IP statique pour votre VM, exécutez la commande ci-dessus. Remplacez `<VOTRE_IP>` par une adresse IP de la plage `10.194.32.155` à `10.194.32.253`. Ça veut dire, nous avons 99 IPs disponibles.
+#### 5.3. Configurez une adresse IP statique
+Pour définir une IP statique pour votre VM, exécutez la commande ci-dessus. Remplacez `<VOTRE_IP>` par une adresse IP de la plage `10.194.32.155` à `10.194.32.253`. Ça veut dire, nous avons 99 IPs disponibles.
 
 ```bash
 # Créer le fichier de configuration netplan
@@ -251,18 +251,18 @@ EOF"
 lxc exec fiware-1:<nom-vm> -- netplan apply
 ```
 
-> ⚠️ **ATTENTION** : Il est **strictement interdit** d’utiliser des adresses autres que celles qui ont été réservées (de `10.194.32.155` à `10.194.32.253`). Si quelqu’un abuse et décide d’attribuer une adresse qui est en dehors de la plage comme `10.194.32.34`, l’accès aux serveurs sera révoqué pour la personne fautive et ses machines seront arrêtées.
+> 🚫 **ATTENTION** : Il est **strictement interdit** d'utiliser des adresses autres que celles qui ont été réservées (de `10.194.32.155` à `10.194.32.253`). Si quelqu'un abuse et décide d'attribuer une adresse qui est en dehors de la plage comme `10.194.32.34`, l'accès aux serveurs sera révoqué pour la personne fautive et ses machines seront arrêtées.
 
-> ⚠️ **IMPORTANT** : Pour éviter des conflictes d'addresse IP avec des collegues, choississez un addresse et enregistrez votre nom dans la liste pour faire vos collegues savoir.
+> ⚠️ **IMPORTANT** : Pour éviter des conflits d'adresse IP avec des camarades, choisissez une adresse et enregistrez votre nom dans la liste pour faire savoir à tous.
 
-Por vérifier l'IP :
+Pour vérifier l'IP :
 ```bash
 lxc exec fiware-1:<nom-vm> -- ip addr show enp5s0
 # Devrait afficher : inet <VOTRE_IP>/24
 ```
 
-### 5.4. Configurez l'access via SSH
-Même si on peut connecter aux VMs via `lxc`, c'est pas idéal parce dans ce cas nous dépendons toujours d'un ordinateur avec le client `lxc` installé et ça ne nous permet pas faire la comunication entre entre VMs, ou entre certains services que n'utilisent pas `lxc` (e.g. outils CI/CD). Ainis, nous devons configurer l`accès SSH :
+#### 5.4. Configurez l'accès via SSH
+Même si on peut se connecter aux VMs via `lxc`, ce n'est pas idéal parce que dans ce cas nous dépendons toujours d'un ordinateur avec le client `lxc` installé et ça ne nous permet pas de faire la communication entre les VMs, ou entre certains services qui n'utilisent pas `lxc` (p. ex. outils CI/CD). Ainsi, nous devons configurer l'accès SSH :
 
 ```bash
 # Créer un keypair (clé privée + clé publique)
@@ -282,9 +282,9 @@ ssh -i ~/.ssh/lxd_key -o StrictHostKeyChecking=accept-new root@<VOTRE_IP> hostna
 ssh -i ~/.ssh/lxd_key root@<VOTRE_IP> 'docker ps'
 ```
 
-### 7. Déployez votre application manuellement
+### 6. Déployez votre application manuellement
 
-Connectez à votre VM et déployez l'application une premiere fois sur la VM manuellement. N'oubliez pas d'installer Docker et toute autre dépendance nécessaire sur la VM :
+Connectez-vous à votre VM et déployez l'application Calculatrice une première fois sur la VM manuellement. N'oubliez pas d'installer Docker et toute autre dépendance nécessaire sur la VM :
 
 ```sh
 git clone https://github.com/[votre-nom]/log430-labo0
@@ -299,17 +299,17 @@ top       # Vérifier l'utilisation du CPU et les processus en cours
 df -h     # Vérifier l'espace disque disponible
 ```
 
-> 📝 **NOTE** : Si vous avez des problèmes de performance avec votre VM (par exemple, une VM lente ou bloquée), essayez de l'arrêter et de la redémarrer, ou de la recréer. Si cela ne fonctionne pas, parlez au chargé de lab.
+> 📝 **NOTE** : Si vous avez une VM très lente ou bloquée, essayez de l'arrêter et de la redémarrer, ou de la recréer. Pour connaître les commandes utiles pour créer/supprimer des VMs, consultez le fichier `COMMANDS.md`. Si cela ne fonctionne pas, parlez au chargé de lab.
 
 > 💡 **Question 3** : Quel type d'informations pouvez-vous obtenir via la commande « top » ? Veuillez donner quelques exemples. Veuillez inclure la sortie du terminal dans votre réponse.
 
-### 8. Automatisez le déploiement continu (CD)
+### 7. Automatisez le déploiement continu (CD)
 
 Plusieurs alternatives existent pour le CD : déploiement par SSH déclenché par webhooks dans GitHub, ou dans un outil CI/CD (ex. ArgoCD). Cependant, dans ce labo, nous vous recommandons d'utiliser un [GitHub Runner auto-hébergé (self-hosted)](https://docs.github.com/fr/actions/how-tos/manage-runners/self-hosted-runners/add-runners).
 
 Nous vous recommandons le GitHub Runner parce que c'est l'approche la plus simple et moins dépendante d'une configuration spécifique de réseau (ex. il n'est pas nécessaire d'ouvrir des ports dans le pare-feu, ou d'utiliser une approche événementielle).
 
-**Résultat attendu** : à chaque fois que vous faites commit/push, votre serveur faira pull automatiquement et mettra l'application en marche.
+**Résultat attendu** : à chaque fois que vous faites `push` à GitHub, votre serveur fera `pull` automatiquement et mettra l'application en marche.
 
 ---
 
