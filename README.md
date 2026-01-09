@@ -200,22 +200,22 @@ Si vous le souhaitez, vous pouvez également configurer [l'accès SSH](https://l
 
 ```bash
 # Arrêter une VM
-lxc stop vm-test1 --remote fiware-1.logti.etsmtl.ca
+lxc stop vm-test1
 
 # Supprimer une VM
-lxc delete vm-test1 --remote fiware-1.logti.etsmtl.ca --force
+lxc delete vm-test1
 
 # Démarrer une VM
-lxc start vm-test1 --remote fiware-1.logti.etsmtl.ca
+lxc start vm-test1
 
 # Voir les logs d'une VM
-lxc logs vm-test1 --remote fiware-1.logti.etsmtl.ca
+lxc logs vm-test1
 
 # Copier des fichiers vers la VM
-lxc file push fichier_local.txt vm-test1/root/ --remote fiware-1.logti.etsmtl.ca
+lxc file push fichier.txt vm-test1/root/
 
 # Copier des fichiers depuis la VM
-lxc file pull vm-test1/root/fichier.txt ./fichier.txt --remote fiware-1.logti.etsmtl.ca
+lxc file pull vm-test1/root/fichier.txt ./fichier.txt
 ```
 
 ### 7. Déployez votre application manuellement
