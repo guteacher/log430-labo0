@@ -1,4 +1,4 @@
-# Annexe : commandes `lxc` utiles
+# Annexe 1 : commandes `lxc` utiles
 
 ```bash
 # Montrer la liste de VMs
@@ -24,4 +24,22 @@ lxc file push fichier.txt <nom-vm>/root/
 
 # Copier un fichier depuis la VM
 lxc file pull <nom-vm>/root/fichier.txt ./fichier.txt
+```
+
+# Annexe 2 : commandes `bash` utiles
+```bash
+# Vérifier l'utilisation du CPU et les processus en cours
+top     
+
+# Vérifier l'utilisation de la RAM
+free -h  
+
+# Vérifier l'espace disque disponible
+df -h     
+
+# Vérifier l'IP de votre VM et les interfaces réseau disponibles
+ip addr show
+
+# Vérifier l'IP de votre VM et les interfaces réseau disponibles (alternative)
+ifconfig
 ```

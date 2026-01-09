@@ -213,7 +213,7 @@ Si la colonne `IPV4` est vide pour vous, ne vous inquiétez pas, parce que nous 
 
 #### 5.2. Changez les configurations de réseau de la VM
 
-Par défaut, la VM est dans un autre réseau, isolé du réseau où `fiware-1.logti.etsmtl.ca` et votre ordinateur sont. Pour permettre l'accès SSH depuis votre ordinateur, vous devez configurer la VM sur l'interface bridge **br0**.
+Par défaut, la VM est dans un autre réseau, isolé du réseau où `fiware-1.logti.etsmtl.ca` et votre ordinateur se trouvent. Pour permettre l'accès SSH depuis votre ordinateur, vous devez configurer la VM sur l'interface bridge `br0`.
 
 ```bash
 #  Ajouter l'interface br0 au profil default 
@@ -223,10 +223,10 @@ lxc profile device add fiware-1:default eth0 nic nictype=bridged parent=lxdbr0
 lxc restart fiware-1:<nom-vm>
 ```
 
-Attendre 30-40 secondes que la VM redémarre.
+Veuillez attendre 30-40 secondes que la VM redémarre.
 
 #### 5.3. Configurez une adresse IP statique
-Pour définir une IP statique pour votre VM, exécutez la commande ci-dessus. Remplacez `<VOTRE_IP>` par une adresse IP de la plage `10.194.32.155` à `10.194.32.253`. Ça veut dire, nous avons 99 IPs disponibles.
+Pour définir une IP statique pour votre VM, exécutez la commande ci-dessus. Remplacez `<VOTRE_IP>` par une adresse IP de la plage `10.194.32.155` à `10.194.32.253`. Cela veut dire que nous avons 99 IPs disponibles.
 
 ```bash
 # Créer le fichier de configuration netplan
@@ -253,7 +253,7 @@ lxc exec fiware-1:<nom-vm> -- netplan apply
 
 > 🚫 **ATTENTION** : Il est **strictement interdit** d'utiliser des adresses autres que celles qui ont été réservées (de `10.194.32.155` à `10.194.32.253`). Si quelqu'un abuse et décide d'attribuer une adresse qui est en dehors de la plage comme `10.194.32.34`, l'accès aux serveurs sera révoqué pour la personne fautive et ses machines seront arrêtées.
 
-> ⚠️ **IMPORTANT** : Pour éviter des conflits d'adresse IP avec des camarades, choisissez une adresse et enregistrez votre nom dans la liste pour faire savoir à tous.
+> ⚠️ **IMPORTANT** : Pour éviter des conflits d'adresse IP avec vos camarades, choisissez une adresse et enregistrez votre nom dans [ce document](https://docs.google.com/spreadsheets/d/1_0PlzMmwb-4yuldcmiKLJd8DlUnk10k1zmhdApn2EKw/edit?usp=sharing) pour les en informer.
 
 Pour vérifier l'IP :
 ```bash
@@ -262,7 +262,7 @@ lxc exec fiware-1:<nom-vm> -- ip addr show enp5s0
 ```
 
 #### 5.4. Configurez l'accès via SSH
-Même si on peut se connecter aux VMs via `lxc`, ce n'est pas idéal parce que dans ce cas nous dépendons toujours d'un ordinateur avec le client `lxc` installé et ça ne nous permet pas de faire la communication entre les VMs, ou entre certains services qui n'utilisent pas `lxc` (p. ex. outils CI/CD). Ainsi, nous devons configurer l'accès SSH :
+Même si on peut se connecter aux VMs via `lxc`, ce n'est pas idéal parce que nous dépendons toujours d'un ordinateur avec le client `lxc` installé et cela ne nous permet pas de communiquer entre les VMs, ou avec certains services qui n'utilisent pas `lxc` (ex. des outils CI/CD). Ainsi, nous devons configurer l'accès SSH dans les VM à partir de notre ordinateur :
 
 ```bash
 # Créer un keypair (clé privée + clé publique)
@@ -291,17 +291,9 @@ git clone https://github.com/[votre-nom]/log430-labo0
 cd log430-labo0
 ```
 
-De plus, voici quelques commandes utiles pour vérifier l'état des ressources :
+> 📝 **NOTE** : Si vous avez une VM très lente ou bloquée, essayez de l'arrêter et de la redémarrer, ou de la recréer. Pour connaître quelques commandes utiles pour créer/supprimer/déboguer des VMs, consultez le fichier `COMMANDS.md`. Si cela ne fonctionne pas, parlez au chargé de lab.
 
-```sh
-free -h   # Vérifier l'utilisation de la RAM
-top       # Vérifier l'utilisation du CPU et les processus en cours
-df -h     # Vérifier l'espace disque disponible
-```
-
-> 📝 **NOTE** : Si vous avez une VM très lente ou bloquée, essayez de l'arrêter et de la redémarrer, ou de la recréer. Pour connaître les commandes utiles pour créer/supprimer des VMs, consultez le fichier `COMMANDS.md`. Si cela ne fonctionne pas, parlez au chargé de lab.
-
-> 💡 **Question 3** : Quel type d'informations pouvez-vous obtenir via la commande « top » ? Veuillez donner quelques exemples. Veuillez inclure la sortie du terminal dans votre réponse.
+> 💡 **Question 3** : Quel type d'informations pouvez-vous obtenir via la commande `top` ? Veuillez donner quelques exemples. Veuillez inclure la sortie du terminal dans votre réponse.
 
 ### 7. Automatisez le déploiement continu (CD)
 
