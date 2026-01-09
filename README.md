@@ -146,7 +146,7 @@ Déployer en production signifie copier votre dépôt et faire le setup de votre
 
 Dans le cours LOG430, nous utiliserons des VMs créées dans [LXD](https://canonical.com/lxd), une application de gestion de VMs et conteneurs. Nous utiliserons une instance LXD hébergée par l'école.
 
-### 5. Installez le client LXD
+### 5. Installez lxc
 
 Nous utiliserons [lxc](https://documentation.ubuntu.com/lxd/latest/reference/manpages/lxc/), un client LXD disponible pour Windows, macOS et Linux.
 
@@ -220,7 +220,7 @@ lxc file pull vm-test1/root/fichier.txt ./fichier.txt --remote fiware-1.logti.et
 
 ### 7. Déployez votre application manuellement
 
-Une fois que vous êtes connecté à la VM, déployez l'application sur la VM manuellement. N'oubliez pas d'installer Python, Docker et toutes les dépendances nécessaires sur la VM :
+Une fois que vous êtes connecté à la VM, déployez l'application sur la VM manuellement. N'oubliez pas d'installer Git, Docker et toutes les dépendances nécessaires sur la VM :
 
 ```sh
 git clone https://github.com/[votre-nom]/log430-labo0
@@ -243,7 +243,7 @@ df -h     # Vérifier l'espace disque disponible
 
 Plusieurs alternatives existent pour le CD : déploiement déclenché par webhooks via SSH, ou via un outil CI/CD (ex. ArgoCD). Cependant, dans ce labo, nous vous recommandons d'utiliser un [GitHub Runner auto-hébergé (self-hosted)](https://docs.github.com/fr/actions/how-tos/manage-runners/self-hosted-runners/add-runners).
 
-Nous vous recommandons le GitHub Runner parce que c'est l'approche plus simple et moins dépendante d'une configuration spécifique de réseau (ex. il n'est pas nécessaire d'ouvrir des ports dans le pare-feu, ou d'utiliser une approche événementielle).
+Nous vous recommandons le GitHub Runner parce que c'est l'approche la plus simple et moins dépendante d'une configuration spécifique de réseau (ex. il n'est pas nécessaire d'ouvrir des ports dans le pare-feu, ou d'utiliser une approche événementielle).
 
 ---
 
