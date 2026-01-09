@@ -165,22 +165,34 @@ Installez sur macOS via `brew` :
 brew install lxc
 ```
 
-Pour ajouter les deux serveurs LXD, connectez-vous au **VPN** et exécutez :
+Pour ajouter les serveurs LXD, connectez-vous au **VPN** et exécutez :
 ```sh
 lxc remote add fiware-1.logti.etsmtl.ca
-lxc remote add fiware-2.logti.etsmtl.ca
 ```
 
 Ces commandes demanderont un jeton chacune. Demandez votre jeton au chargé de lab.
 
 > 📝 **NOTE** : Ce sont des jetons à usage unique. Par conséquent, lorsqu'une personne intègre un serveur dans son client LXD, le jeton est annulé et ne peut plus être utilisé pour ajouter un second client.
 
-### 6. Créez des VMs dans votre serveur LXD
-Pour créer une VM sur le serveur `fiware-1.logti.etsmtl.ca`, exécutez `lxc remote switch` et `lxc launch`. Dans l'exemple ci-dessus, remplacez `vm-test1` par le nom que vous voulez donner à votre VM :
-```sh
-lxc remote switch fiware-1.logti.etsmtl.ca
-lxc launch ubuntu:jammy vm-test1
+Ensuite, configurez votre profil dans `lxc`. Il ne faudra le faire qu'une seule fois, les VMs subsequents suvront deja ces configurations :
+
+```bash
+# Ajouter un device root au profil
+lxc profile device add fiware-1:default root disk path=/ pool=default size=20GB
+
+# Définir une limite de mémoire (4GB recommandé, max 8GB selon quotas)
+lxc profile set fiware-1:default limits.memory=4GB
 ```
+
+#### 5.1. Créez une VM
+Pour créer une VM sur le serveur `fiware-1.logti.etsmtl.ca`, exécutez `lxc launch`. Dans l'exemple ci-dessus, remplacez `<nom-vm>` par le nom que vous voulez donner à votre VM :
+```sh
+lxc launch ubuntu:22.04 fiware-1:<nom-vm> --vm
+```
+
+> 📝 **NOTE** : Pour les noms de VMs, preferez les noms en kebab-case. Par exemple: `vm-gabriel-log430`.
+
+> ⚠️ **IMPORTANT** : C'est crucial d'utiliser le flag `--vm` parce que, sans ce flag, LXD créera un conteneur au lieu d'une VM, et Docker ne pourra pas fonctionner.
 
 Pour voir la liste des machines virtuelles sur le serveur avec leur adresse IP et leur statut :
 
@@ -188,39 +200,91 @@ Pour voir la liste des machines virtuelles sur le serveur avec leur adresse IP e
 lxc list
 ```
 
-Pour accèder à la VM :
-
-```bash
-lxc exec vm-test1 -- bash
+Voici un exemple de sortie attendue :
+```sh
++--------------------+---------+------+-----------------------------------------------+-----------------+-----------+
+|       NAME         |  STATE  | IPV4 |                     IPV6                      |      TYPE       | SNAPSHOTS |
++--------------------+---------+------+-----------------------------------------------+-----------------+-----------+
+| <nom-vm>           | RUNNING |      | fd42:e706:c40b:f0b7:216:3eff:fe35:9940 (eth0) | VIRTUAL-MACHINE | 0         |
++--------------------+---------+------+-----------------------------------------------+-----------------+-----------+
 ```
 
-Si vous le souhaitez, vous pouvez également configurer [l'accès SSH](https://linuxconfig.org/linux-setup-ssh) dans votre VM au cours de cette étape. Cependant, assurez-vous d'abord que vous pouvez atteindre l'adresse IP de la VM à laquelle vous souhaitez accéder.
+Si la colonne ipv4 est vide, ne vous inquitez pas, parce que nous allons configurez le réseau dans le prochains étapes.
 
-#### 6.1. Annexe : commandes utiles
+#### 5.2. Changez les configurations de réseau de la VM
+
+Par défaut, la VM est dans un autre réseau, isolé du réseau ou `fiware-1.logti.etsmtl.ca` et ou votre ordinateur sont. Pour permettre l'accès SSH depuis votre ordinateur, vous devez configurer la VM sur l'interface bridge **br0**.
 
 ```bash
-# Arrêter une VM
-lxc stop vm-test1
+#  Ajouter l'interface br0 au profil default 
+lxc profile device add fiware-1:default eth0 nic nictype=bridged parent=lxdbr0
 
-# Supprimer une VM
-lxc delete vm-test1
+# Redémarrer la VM
+lxc restart fiware-1:<nom-vm>
+```
 
-# Démarrer une VM
-lxc start vm-test1
+Attendre 30-40 secondes que la VM redémarre.
 
-# Voir les logs d'une VM
-lxc console vm-test1 --show-log
+#### 5.3. Configurez un addresse IP statique
+Pour défniir un IP statique pour votre VM, exécutez la commande ci-dessus. Remplacez `<VOTRE_IP>` par une adresse IP de la plage `10.194.32.155` à `10.194.32.253`. Ça veut dire, nous avons 99 IPs disponibles.
 
-# Copier des fichiers vers la VM
-lxc file push fichier.txt vm-test1/root/
+```bash
+# Créer le fichier de configuration netplan
+lxc exec fiware-1:<nom-vm> -- bash -c "cat > /etc/netplan/50-cloud-init.yaml <<'EOF'
+network:
+  version: 2
+  ethernets:
+    enp5s0:
+      dhcp4: no
+      addresses:
+        - <VOTRE_IP>/24
+      routes:
+        - to: default
+          via: 10.194.32.1
+      nameservers:
+        addresses:
+          - 10.162.8.10
+          - 10.162.8.11
+EOF"
 
-# Copier des fichiers depuis la VM
-lxc file pull vm-test1/root/fichier.txt ./fichier.txt
+# Appliquer la configuration
+lxc exec fiware-1:<nom-vm> -- netplan apply
+```
+
+> ⚠️ **ATTENTION** : Il est **strictement interdit** d’utiliser des adresses autres que celles qui ont été réservées (de `10.194.32.155` à `10.194.32.253`). Si quelqu’un abuse et décide d’attribuer une adresse qui est en dehors de la plage comme `10.194.32.34`, l’accès aux serveurs sera révoqué pour la personne fautive et ses machines seront arrêtées.
+
+> ⚠️ **IMPORTANT** : Pour éviter des conflictes d'addresse IP avec des collegues, choississez un addresse et enregistrez votre nom dans la liste pour faire vos collegues savoir.
+
+Por vérifier l'IP :
+```bash
+lxc exec fiware-1:<nom-vm> -- ip addr show enp5s0
+# Devrait afficher : inet <VOTRE_IP>/24
+```
+
+### 5.4. Configurez l'access via SSH
+Même si on peut connecter aux VMs via `lxc`, c'est pas idéal parce dans ce cas nous dépendons toujours d'un ordinateur avec le client `lxc` installé et ça ne nous permet pas faire la comunication entre entre VMs, ou entre certains services que n'utilisent pas `lxc` (e.g. outils CI/CD). Ainis, nous devons configurer l`accès SSH :
+
+```bash
+# Créer un keypair (clé privée + clé publique)
+ssh-keygen -t rsa -b 4096 -f ~/.ssh/lxd_key
+
+# Créer le dossier .ssh dans la VM
+lxc exec fiware-1:<nom-vm> -- mkdir -p /root/.ssh
+
+# Copier la clé publique à la VM
+lxc file push ~/.ssh/lxd_key.pub fiware-1:<nom-vm>/root/.ssh/authorized_keys
+
+# Définir les permissions
+lxc exec fiware-1:<nom-vm> -- bash -c "chmod 700 /root/.ssh && chmod 600 /root/.ssh/authorized_keys"
+
+# Tester la connexion
+ssh -i ~/.ssh/lxd_key -o StrictHostKeyChecking=accept-new root@<VOTRE_IP> hostname
+ssh -i ~/.ssh/lxd_key root@<VOTRE_IP> 'docker ps'
 ```
 
 ### 7. Déployez votre application manuellement
 
-Une fois que vous êtes connecté à la VM, déployez l'application sur la VM manuellement. N'oubliez pas d'installer Git, Docker et toutes les dépendances nécessaires sur la VM :
+Connectez à votre VM et déployez l'application une premiere fois sur la VM manuellement. N'oubliez pas d'installer Docker et toute autre dépendance nécessaire sur la VM :
 
 ```sh
 git clone https://github.com/[votre-nom]/log430-labo0
@@ -241,9 +305,11 @@ df -h     # Vérifier l'espace disque disponible
 
 ### 8. Automatisez le déploiement continu (CD)
 
-Plusieurs alternatives existent pour le CD : déploiement déclenché par webhooks via SSH, ou via un outil CI/CD (ex. ArgoCD). Cependant, dans ce labo, nous vous recommandons d'utiliser un [GitHub Runner auto-hébergé (self-hosted)](https://docs.github.com/fr/actions/how-tos/manage-runners/self-hosted-runners/add-runners).
+Plusieurs alternatives existent pour le CD : déploiement par SSH déclenché par webhooks dans GitHub, ou dans un outil CI/CD (ex. ArgoCD). Cependant, dans ce labo, nous vous recommandons d'utiliser un [GitHub Runner auto-hébergé (self-hosted)](https://docs.github.com/fr/actions/how-tos/manage-runners/self-hosted-runners/add-runners).
 
 Nous vous recommandons le GitHub Runner parce que c'est l'approche la plus simple et moins dépendante d'une configuration spécifique de réseau (ex. il n'est pas nécessaire d'ouvrir des ports dans le pare-feu, ou d'utiliser une approche événementielle).
+
+**Résultat attendu** : à chaque fois que vous faites commit/push, votre serveur faira pull automatiquement et mettra l'application en marche.
 
 ---
 
