@@ -229,6 +229,10 @@ Veuillez attendre 30-40 secondes que la VM redémarre.
 Pour définir une IP statique pour votre VM, exécutez la commande ci-dessus. Remplacez `<VOTRE_IP>` par une adresse IP de la plage `10.194.32.155` à `10.194.32.253`. Cela veut dire que nous avons 99 IPs disponibles.
 
 ```bash
+# Installer openvswitch dans la VM
+lxc exec fiware-1:<nom-vm> -- sudo apt update
+lxc exec fiware-1:<nom-vm> -- sudo apt install openvswitch-switch -y
+
 # Créer le fichier de configuration netplan
 lxc exec fiware-1:<nom-vm> -- bash -c "cat > /etc/netplan/50-cloud-init.yaml <<'EOF'
 network:
