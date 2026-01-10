@@ -209,7 +209,7 @@ Voici un exemple de sortie attendue :
 +--------------------+---------+------+-----------------------------------------------+-----------------+-----------+
 ```
 
-Si la colonne `IPV4` est vide pour vous, ne vous inquiétez pas, parce que nous allons configurer le réseau dans les prochaines étapes.
+Si la colonne `IPV4` est vide pour vous ou si vous obtenez une erreur de réseau, ne vous inquiétez pas, parce que nous allons configurer le réseau dans les prochaines étapes.
 
 #### 5.2. Changez les configurations de réseau de la VM
 
