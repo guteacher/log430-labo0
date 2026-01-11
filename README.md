@@ -314,4 +314,4 @@ Nous vous recommandons le GitHub Runner parce que c'est l'approche la plus simpl
 - Code compressé en `.zip` contenant **l'ensemble du code source** du projet Labo 00.
 - Rapport `.pdf` répondant aux 3 questions présentées dans ce fichier. Il est **obligatoire** d'ajouter du code ou des sorties de terminal pour illustrer chacune de vos réponses.
 
-Vous avez des questions sur le format de soumission ? [Voici un exemple](https://drive.google.com/file/d/12ss6zSayGCjHCydf9fRJ3wvqsOQNMBa9/view?usp=sharing). Veuillez respecter cette même structure de dossiers pour **toutes** vos soumissions de laboratoire.
+Vous avez des questions sur le format de soumission ? [Voici un exemple](https://drive.google.com/file/d/12ss6zSayGCjHCydf9fRJ3wvqsOQNMBa9/view?usp=sharing). Veuillez respecter cette même structure de dossiers pour **toutes** vos soumissions de laboratoire. Cela nous permet de corriger vos laboratoires plus rapidement et plus correctement.
