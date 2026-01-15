@@ -29,7 +29,7 @@ Dans les prochains laboratoires, nous verrons des architectures plus complexes e
 ### 1. Clonez le dépôt
 
 ```bash
-git clone https://github.com/[votrenom]/log430-labo0
+git clone < lien à votre dépôt GitHub >
 cd log430-labo0
 ```
 
@@ -216,8 +216,10 @@ Si la colonne `IPV4` est vide pour vous ou si vous obtenez une erreur de réseau
 Par défaut, la VM est dans un autre réseau, isolé du réseau où `fiware-1.logti.etsmtl.ca` et votre ordinateur se trouvent. Pour permettre l'accès SSH depuis votre ordinateur, vous devez configurer la VM sur l'interface bridge `br0`.
 
 ```bash
-#  Ajouter l'interface br0 au profil default 
-lxc profile device add fiware-1:default eth0 nic nictype=bridged parent=lxdbr0
+#  Ajouter l'interface br0 au profil 
+lxc profile device add fiware-1:<nom-vm> eth0 nic nictype=bridged parent=lxdbr0
+lxc config device override fiware-1:<nom-vm> eth0
+lxc config device set fiware-1:<nom-vm> eth0 parent=br0
 
 # Redémarrer la VM
 lxc restart fiware-1:<nom-vm>
@@ -262,13 +264,28 @@ lxc exec fiware-1:<nom-vm> -- netplan apply
 Pour vérifier l'IP :
 ```bash
 lxc exec fiware-1:<nom-vm> -- ip addr show enp5s0
-# Devrait afficher : inet <VOTRE_IP>/24
+```
+
+Résultat attendu :
+```bash
+2: enp5s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 00:16:3e:35:99:40 brd ff:ff:ff:ff:ff:ff
+    inet <VOTRE_IP>/24 brd 10.194.32.255 scope global enp5s0
+       valid_lft forever preferred_lft forever
+```
+
+Pour vérifier la connectivité depuis votre ordinateur, éxécutez `ping`. Remplacez `<VOTRE_IP>` pour l'IP de la VM (ATTENTION: ceci n'est pas l'IP à votre ordinateur) :
+```bash
+ping -c 3 <VOTRE_IP>
 ```
 
 #### 5.4. Configurez l'accès via SSH
 Même si on peut se connecter aux VMs via `lxc`, ce n'est pas idéal parce que nous dépendons toujours d'un ordinateur avec le client `lxc` installé et cela ne nous permet pas de communiquer entre les VMs, ou avec certains services qui n'utilisent pas `lxc` (ex. des outils CI/CD). Ainsi, nous devons configurer l'accès SSH dans les VM à partir de notre ordinateur :
 
 ```bash
+# Installer openssh-server dans la VM
+lxc exec fiware-1:vm-achref-log430 -- bash -c "apt update && apt install -y openssh-server"
+
 # Créer un keypair (clé privée + clé publique)
 ssh-keygen -t rsa -b 4096 -f ~/.ssh/lxd_key
 
@@ -291,7 +308,7 @@ ssh -i ~/.ssh/lxd_key root@<VOTRE_IP> 'docker ps'
 Connectez-vous à votre VM et déployez l'application Calculatrice une première fois sur la VM manuellement. N'oubliez pas d'installer Docker et toute autre dépendance nécessaire sur la VM :
 
 ```sh
-git clone https://github.com/[votre-nom]/log430-labo0
+git clone < lien à votre dépôt GitHub >
 cd log430-labo0
 ```
 
