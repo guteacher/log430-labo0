@@ -116,9 +116,9 @@ pytest
 
 > 💡 **Question 1** : Si l'un des tests échoue à cause d'un bug, comment pytest signale-t-il l'erreur et aide-t-il à la localiser ? Rédigez un test qui provoque volontairement une erreur, puis montrez la sortie du terminal obtenue.
 
-### 2. Ajoutez une étape à la pipeline CI (Intégration Continue)
+### 2. Vérifier les étapes à la pipeline CI (Intégration Continue)
 
-Ajoutez une étape (step) dans `.github/workflows/.github-ci.yml` pour que GitHub exécute les tests automatiquement à chaque push.
+Le fichier `.github/workflows/.github-ci.yml` est dèjá preparé pour que GitHub exécute les tests automatiquement à chaque push. Veuillez lire le fichier pour vous familiarizer avec les étapes (steps).
 
 > ⚠️ **IMPORTANT** : Il n'est pas recommandé d'écrire les noms d'utilisateur et les mots de passe en « plain text » dans un fichier tel que `.github/workflows/.github-ci.yml`. Veuillez utiliser les [secrets](https://docs.github.com/fr/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) dans un [environnement GitHub](https://docs.github.com/fr/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments#creating-an-environment) **si vous avez besoin** de gérer des informations d'authentification.
 
