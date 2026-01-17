@@ -217,9 +217,9 @@ Par défaut, la VM est dans un autre réseau, isolé du réseau où `fiware-1.lo
 
 ```bash
 #  Ajouter l'interface br0 au profil 
-lxc profile device add fiware-1:<nom-vm> eth0 nic nictype=bridged parent=lxdbr0
-lxc config device override fiware-1:<nom-vm> eth0
-lxc config device set fiware-1:<nom-vm> eth0 parent=br0
+lxc profile device add fiware-1:default eth0 nic nictype=bridged parent=lxdbr0
+lxc config device override fiware-1:default eth0
+lxc config device set fiware-1:default eth0 parent=br0
 
 # Redémarrer la VM
 lxc restart fiware-1:<nom-vm>
