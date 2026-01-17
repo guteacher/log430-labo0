@@ -316,7 +316,7 @@ cd log430-labo0
 
 Plusieurs alternatives existent pour le CD : déploiement par SSH déclenché par webhooks dans GitHub, ou dans un outil CI/CD (ex. ArgoCD). Cependant, dans ce labo, nous vous recommandons d'utiliser un [GitHub Runner auto-hébergé (self-hosted)](https://docs.github.com/fr/actions/how-tos/manage-runners/self-hosted-runners/add-runners).
 
-Nous vous recommandons le GitHub Runner parce que c'est l'approche la plus simple et moins dépendante d'une configuration spécifique de réseau (ex. il n'est pas nécessaire d'ouvrir des ports dans le pare-feu, ou d'utiliser une approche événementielle).
+Nous vous recommandons le GitHub Runner parce que c'est l'approche la plus simple et moins dépendante d'une configuration spécifique de réseau (ex. il n'est pas nécessaire d'ouvrir des ports dans le pare-feu, ou d'utiliser une approche événementielle). Voici quelques [exemples](https://docs.github.com/fr/actions/how-tos/manage-runners/self-hosted-runners/use-in-a-workflow) de workflow CI.
 
 **Résultat attendu** : à chaque fois que vous faites `push` à GitHub, votre serveur fera `pull` automatiquement et mettra l'application en marche.
 
