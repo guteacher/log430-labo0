@@ -167,7 +167,7 @@ brew install lxc
 
 Pour ajouter les serveurs LXD, connectez-vous au **VPN** et exécutez :
 ```sh
-lxc remote add fiware-1.logti.etsmtl.ca
+lxc remote add fiware-1 fiware-1.logti.etsmtl.ca
 ```
 
 Ces commandes demanderont un jeton chacune. Demandez votre jeton au chargé de lab.
@@ -177,11 +177,14 @@ Ces commandes demanderont un jeton chacune. Demandez votre jeton au chargé de l
 Ensuite, configurez votre profil dans `lxc`. Il ne faudra le faire qu'une seule fois, les VMs subséquentes suivront déjà ces configurations :
 
 ```bash
-# Ajouter un device root au profil
-lxc profile device add fiware-1:default root disk path=/ pool=default size=20GB
+# Voir les profils disponibles
+lxc profile list
+
+# Ajouter un device root au profil default
+lxc profile device add default root disk path=/ pool=default size=20GB
 
 # Définir une limite de mémoire (4GB recommandé, max 8GB selon quotas)
-lxc profile set fiware-1:default limits.memory=4GB
+lxc profile set default limits.memory=4GB
 ```
 
 #### 5.1. Créez une VM
@@ -217,9 +220,9 @@ Par défaut, la VM est dans un autre réseau, isolé du réseau où `fiware-1.lo
 
 ```bash
 #  Ajouter l'interface br0 au profil 
-lxc profile device add fiware-1:default eth0 nic nictype=bridged parent=lxdbr0
-lxc config device override fiware-1:default eth0
-lxc config device set fiware-1:default eth0 parent=br0
+lxc profile device add default eth0 nic nictype=bridged parent=lxdbr0
+lxc config device override fiware-1:<nom-vm> eth0
+lxc config device set fiware-1:<nom-vm> eth0 parent=br0
 
 # Redémarrer la VM
 lxc restart fiware-1:<nom-vm>
@@ -229,6 +232,9 @@ Veuillez attendre 30-40 secondes que la VM redémarre.
 
 #### 5.3. Configurez une adresse IP statique
 Pour définir une IP statique pour votre VM, exécutez la commande ci-dessus. Remplacez `<VOTRE_IP>` par une adresse IP de la plage `10.194.32.155` à `10.194.32.253`. Cela veut dire que nous avons 99 IPs disponibles.
+
+> 🚫 **ATTENTION** : Il est **strictement interdit** d'utiliser des adresses autres que celles réservées (de `10.194.32.155` à `10.194.32.253`). Si quelqu'un abuse et décide d'attribuer une adresse qui est en dehors de la plage comme `10.194.32.34`, l'accès aux serveurs sera révoqué pour la personne fautive et ses machines seront arrêtées.
+> ⚠️ **IMPORTANT** : Pour éviter des conflits d'adresse IP avec vos camarades, choisissez une adresse et enregistrez votre nom dans [ce document](https://docs.google.com/spreadsheets/d/1_0PlzMmwb-4yuldcmiKLJd8DlUnk10k1zmhdApn2EKw/edit?usp=sharing) afin de les informer.
 
 ```bash
 # Créer le fichier de configuration netplan
@@ -253,9 +259,7 @@ EOF"
 lxc exec fiware-1:<nom-vm> -- netplan apply
 ```
 
-> 🚫 **ATTENTION** : Il est **strictement interdit** d'utiliser des adresses autres que celles qui ont été réservées (de `10.194.32.155` à `10.194.32.253`). Si quelqu'un abuse et décide d'attribuer une adresse qui est en dehors de la plage comme `10.194.32.34`, l'accès aux serveurs sera révoqué pour la personne fautive et ses machines seront arrêtées.
-
-> ⚠️ **IMPORTANT** : Pour éviter des conflits d'adresse IP avec vos camarades, choisissez une adresse et enregistrez votre nom dans [ce document](https://docs.google.com/spreadsheets/d/1_0PlzMmwb-4yuldcmiKLJd8DlUnk10k1zmhdApn2EKw/edit?usp=sharing) pour les en informer.
+> 📝 **NOTE** : Le warning "Cannot call Open vSwitch: ovsdb-server.service is not running" est normal et sans conséquence.
 
 Pour vérifier l'IP :
 ```bash
@@ -265,12 +269,12 @@ lxc exec fiware-1:<nom-vm> -- ip addr show enp5s0
 Résultat attendu :
 ```bash
 2: enp5s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
-    link/ether 00:16:3e:35:99:40 brd ff:ff:ff:ff:ff:ff
+    link/ether 00:16:3e:16:17:40 brd ff:ff:ff:ff:ff:ff
     inet <VOTRE_IP>/24 brd 10.194.32.255 scope global enp5s0
        valid_lft forever preferred_lft forever
 ```
 
-Pour vérifier la connectivité depuis votre ordinateur, éxécutez `ping`. Remplacez `<VOTRE_IP>` pour l'IP de la VM (ATTENTION: ceci n'est pas l'IP à votre ordinateur) :
+Pour vérifier la connectivité depuis votre ordinateur, exécutez `ping`. Remplacez `<VOTRE_IP>` pour l'IP de la VM (ATTENTION: ceci n'est pas l'IP à votre ordinateur) :
 ```bash
 ping -c 3 <VOTRE_IP>
 ```
@@ -280,7 +284,7 @@ Même si on peut se connecter aux VMs via `lxc`, ce n'est pas idéal parce que n
 
 ```bash
 # Installer openssh-server dans la VM
-lxc exec fiware-1:vm-achref-log430 -- bash -c "apt update && apt install -y openssh-server"
+lxc exec fiware-1:<nom-vm> -- bash -c "apt update && apt install -y openssh-server"
 
 # Créer un keypair (clé privée + clé publique)
 ssh-keygen -t rsa -b 4096 -f ~/.ssh/lxd_key
@@ -296,7 +300,7 @@ lxc exec fiware-1:<nom-vm> -- bash -c "chmod 700 /root/.ssh && chmod 600 /root/.
 
 # Tester la connexion
 ssh -i ~/.ssh/lxd_key -o StrictHostKeyChecking=accept-new root@<VOTRE_IP> hostname
-ssh -i ~/.ssh/lxd_key root@<VOTRE_IP> 'docker ps'
+ssh -i ~/.ssh/lxd_key root@<VOTRE_IP>
 ```
 
 ### 6. Déployez votre application manuellement
