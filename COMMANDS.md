@@ -16,6 +16,9 @@ lxc delete <nom-vm>
 # Démarrer une VM
 lxc start <nom-vm>
 
+# Changer de remote (c'est utile si vous utilisez plusieurs serveurs LXD)
+lxc remote switch <nom-remote>
+
 # Voir les logs d'une VM
 lxc console <nom-vm> --show-log
 
